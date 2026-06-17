@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RP Luxury – Fragancias</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* ── Tipografía y variables de color ─────────────────────── */
+    :root {
+      --fondo:        #ffffff;
+      --superficie:   #faf9f6;
+      --borde:        #e0ddd5;
+      --dorado:       #b8923a;
+      --dorado-suave: #8a6d2a;
+      --texto:        #2a2a2a;
+      --texto-dim:    #777;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--fondo);
+      color: var(--texto);
+      font-family: 'Montserrat', sans-serif;
+      min-height: 100vh;
+    }
+
+    /* ── Header ──────────────────────────────────────────────── */
+    header {
+      padding: 2.5rem 2rem 1.5rem;
+      border-bottom: 1px solid var(--borde);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      align-items: flex-end;
+      justify-content: space-between;
+    }
+    header h1 {
+      font-size: 1.6rem;
+      font-weight: normal;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--dorado);
+    }
+    header p#contador {
+      font-family: monospace;
+      font-size: 0.8rem;
+      color: var(--texto-dim);
+    }
+
+    @media (max-width: 640px) {
+      header {
+        padding: 1.5rem 1rem 1rem;
+      }
+      header h1 {
+        font-size: 1.2rem;
+      }
+    }
+
+    /* ── Barra de búsqueda y filtros ─────────────────────────── */
+    #controles {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      padding: 1.25rem 2rem;
+      border-bottom: 1px solid var(--borde);
+      background: var(--superficie);
+    }
+    #controles input,
+    #controles select {
+      background: var(--fondo);
+      border: 1px solid var(--borde);
+      color: var(--texto);
+      padding: 0.5rem 0.9rem;
+      border-radius: 4px;
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    #controles input { flex: 1; min-width: 200px; }
+    #controles input:focus,
+    #controles select:focus { border-color: var(--dorado); }
+
+    /* ── Grilla de productos: 2 columnas (1 en mobile) ────────── */
+    #grilla {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.2rem;
+      padding: 2rem;
+    }
+
+    @media (max-width: 640px) {
+      #grilla {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.75rem;
+        padding: 0.75rem;
+      }
+    }
+
+    /* ── Tarjeta individual (landscape) ───────────────────────── */
+    .tarjeta {
+      background: var(--superficie);
+      border: 1px solid var(--borde);
+      border-radius: 6px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: row;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+    .tarjeta:hover {
+      transform: translateY(-4px);
+      border-color: var(--dorado);
+    }
+
+    @media (max-width: 640px) {
+      .tarjeta {
+        flex-direction: column;
+      }
+    }
+
+    /* Contenedor de imagen landscape */
+    .tarjeta .imagen-wrap {
+      width: 180px;
+      min-width: 180px;
+      background: #f0eee8;
+      overflow: hidden;
+    }
+
+    @media (max-width: 640px) {
+      .tarjeta .imagen-wrap {
+        width: 100%;
+        min-width: 0;
+        aspect-ratio: 4 / 3;
+      }
+    }
+    .tarjeta .imagen-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: opacity 0.3s;
+    }
+    /* Mientras carga la imagen se ve transparente */
+    .tarjeta .imagen-wrap img.cargando { opacity: 0; }
+
+    .tarjeta .info {
+      padding: 0.85rem 1rem 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      flex: 1;
+      justify-content: center;
+    }
+
+    @media (max-width: 640px) {
+      .tarjeta .info {
+        padding: 0.6rem 0.7rem 0.75rem;
+        gap: 0.3rem;
+      }
+      .tarjeta .nombre {
+        font-size: 0.72rem;
+      }
+      .tarjeta .cantidad-chip {
+        font-size: 0.65rem;
+        padding: 0.05rem 0.4rem;
+      }
+    }
+
+    .tarjeta .marca {
+      font-size: 0.68rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--dorado);
+      font-weight: 600;
+    }
+
+    .tarjeta .nombre {
+      font-size: 0.82rem;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      line-height: 1.4;
+      color: var(--texto);
+    }
+
+    .tarjeta .referencia {
+      font-family: monospace;
+      font-size: 0.58rem;
+      color: var(--borde);
+      margin-top: auto;
+      padding-top: 0.4rem;
+    }
+
+    /* Lista de cantidades disponibles (chips) */
+    .tarjeta .cantidades {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.35rem;
+      margin-top: 0.2rem;
+    }
+    .tarjeta .cantidad-chip {
+      font-family: monospace;
+      font-size: 0.72rem;
+      color: var(--dorado);
+      border: 1px solid var(--dorado);
+      border-radius: 3px;
+      padding: 0.1rem 0.5rem;
+      letter-spacing: 0.05em;
+    }
+
+    /* ── Sin resultados ──────────────────────────────────────── */
+    #sin-resultados {
+      display: none;
+      text-align: center;
+      padding: 4rem 2rem;
+      color: var(--texto-dim);
+      font-size: 1rem;
+    }
+
+    /* ── Barra inferior fija (categorías) ─────────────────────── */
+    #barra-categorias {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      display: flex;
+      background: var(--superficie);
+      border-top: 1px solid var(--borde);
+      box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+      z-index: 100;
+    }
+    #barra-categorias button {
+      flex: 1;
+      background: none;
+      border: none;
+      padding: 0.85rem 0.5rem;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 0.78rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--texto-dim);
+      cursor: pointer;
+      transition: color 0.2s, background 0.2s;
+      border-bottom: 2px solid transparent;
+    }
+    #barra-categorias button.activa {
+      color: var(--dorado);
+      border-bottom: 2px solid var(--dorado);
+      font-weight: bold;
+    }
+    #barra-categorias button:hover:not(.activa) {
+      color: var(--texto);
+      background: rgba(0,0,0,0.02);
+    }
+
+    /* Espacio al final de la página para que la barra no tape contenido */
+    #grilla {
+      padding-bottom: 5rem;
+    }
+
+    /* ── Toast "Próximamente" ──────────────────────────────────── */
+    #toast {
+      position: fixed;
+      bottom: 4.5rem;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: #2a2a2a;
+      color: #fff;
+      padding: 0.6rem 1.4rem;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      letter-spacing: 0.05em;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s, transform 0.25s;
+      z-index: 200;
+      white-space: nowrap;
+    }
+    #toast.visible {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>RP Luxury — Fragancias</h1>
+    <p id="contador">Cargando…</p>
+  </header>
+
+  <!-- Grilla donde se insertan las tarjetas -->
+  <div id="grilla"></div>
+
+  <!-- Mensaje si no hay coincidencias -->
+  <p id="sin-resultados">No se encontraron productos para esta búsqueda.</p>
+
+  <!-- Aviso flotante "Próximamente" -->
+  <div id="toast"></div>
+
+  <!-- Barra inferior fija: navegación entre catálogos -->
+  <nav id="barra-categorias">
+    <button class="activa" data-categoria="hombres">Hombres</button>
+    <button data-categoria="mujeres">Mujeres</button>
+  </nav>
+
+
+  <script>
+  /*
+  ============================================================
+    PASO 1 - CARGAR EL CSV
+    Los datos se leen via fetch() desde archivos CSV externos.
+    fragancias_hombres.csv y fragancias_mujeres.csv deben estar
+    en la misma carpeta que este HTML, en el hosting.
+  ============================================================
+  */
+  async function cargarCSV_hombres() {
+    const respuesta = await fetch('fragancias_hombres.csv');
+    if (!respuesta.ok) throw new Error('No se pudo cargar fragancias_hombres.csv');
+    return await respuesta.text();
+  }
+
+  async function cargarCSV_mujeres() {
+    const respuesta = await fetch('fragancias_mujeres.csv');
+    if (!respuesta.ok) throw new Error('No se pudo cargar fragancias_mujeres.csv');
+    return await respuesta.text();
+  }
+
+
+  /*
+  ============================================================
+    PASO 2 – PARSEAR EL CSV
+    La primera fila tiene los nombres de columnas.
+    Devuelve un array de objetos { nombre, url_imagen, ... }
+  ============================================================
+  */
+  function parsearCSV(texto) {
+    const lineas = texto.trim().split('\n').filter(l => l.trim() !== '');
+    const cabecera = parsearLineaCSV(lineas[0]);
+
+    // Solo nos interesan estas columnas; el resto se descarta al parsear
+    const COLUMNAS_USADAS = ['nombre', 'cantidades_disponibles', 'referencia', 'url_imagen'];
+
+    const productos = [];
+    for (let i = 1; i < lineas.length; i++) {
+      const valores = parsearLineaCSV(lineas[i]);
+      if (valores.length < cabecera.length) continue;
+
+      const obj = {};
+      cabecera.forEach((col, idx) => {
+        const nombreCol = col.trim();
+        if (COLUMNAS_USADAS.includes(nombreCol)) {
+          obj[nombreCol] = valores[idx] ? valores[idx].trim() : '';
+        }
+      });
+      productos.push(obj);
+    }
+    return productos;
+  }
+
+  /*
+  ============================================================
+    AUXILIAR: parsear UNA línea de CSV
+    Maneja campos entre comillas que pueden contener comas.
+  ============================================================
+  */
+  function parsearLineaCSV(linea) {
+    const resultado = [];
+    let campo = '';
+    let dentroDeComillas = false;
+
+    for (let i = 0; i < linea.length; i++) {
+      const char = linea[i];
+      if (char === '"') {
+        if (dentroDeComillas && linea[i + 1] === '"') {
+          campo += '"';
+          i++;
+        } else {
+          dentroDeComillas = !dentroDeComillas;
+        }
+      } else if (char === ',' && !dentroDeComillas) {
+        resultado.push(campo);
+        campo = '';
+      } else {
+        campo += char;
+      }
+    }
+    resultado.push(campo);
+    return resultado;
+  }
+
+
+  /*
+  ============================================================
+    PASO 3 – PARSEAR CANTIDADES DISPONIBLES
+    El CSV trae una columna "cantidades_disponibles" con
+    formato "100ml" o "50ml | 100ml | 200ml".
+
+    Esta función separa ese string en un array de cantidades
+    normalizadas (ej: ["50 ML", "100 ML", "200 ML"]),
+    ordenadas de menor a mayor.
+
+    Si la columna viene vacía, se usa "Cantidad única".
+  ============================================================
+  */
+  function procesarCantidades(productos) {
+    return productos.map(p => {
+      const raw = (p.cantidades_disponibles || '').trim();
+
+      if (!raw) {
+        return { ...p, cantidades: ['Cantidad única'] };
+      }
+
+      // Separamos por "|", limpiamos espacios y normalizamos
+      // el formato a "<número> ML" (con espacio antes de ML)
+      const cantidades = raw
+        .split('|')
+        .map(c => c.trim())
+        .filter(c => c.length > 0)
+        .map(c => {
+          const m = c.match(/(\d+)\s*ml/i);
+          return m ? `${m[1]} ML` : c.toUpperCase();
+        });
+
+      // Ordenamos numéricamente de menor a mayor
+      cantidades.sort((a, b) => parseInt(a) - parseInt(b));
+
+      return { ...p, cantidades: cantidades.length ? cantidades : ['Cantidad única'] };
+    });
+  }
+
+
+  /*
+  ============================================================
+    PASO 4 – CREAR UNA TARJETA HTML
+    Recibe un producto (ya agrupado, con su array de
+    "cantidades") y devuelve el elemento <div> de la tarjeta.
+  ============================================================
+  */
+  function crearTarjeta(producto) {
+    const tarjeta = document.createElement('div');
+    tarjeta.className = 'tarjeta';
+
+    // ── Imagen ────────────────────────────────────────────────
+    const imgWrap = document.createElement('div');
+    imgWrap.className = 'imagen-wrap';
+
+    const img = document.createElement('img');
+    img.className = 'cargando';
+    img.alt = producto.nombre;
+
+    img.onload  = () => img.classList.remove('cargando');
+    img.onerror = () => {
+      imgWrap.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#999;font-size:0.7rem;text-align:center;padding:1rem;">Sin imagen</div>`;
+    };
+    img.src = producto.url_imagen || '';
+
+    imgWrap.appendChild(img);
+
+    // ── Info textual ──────────────────────────────────────────
+    const info = document.createElement('div');
+    info.className = 'info';
+
+    // Nombre del producto
+    const nombre = document.createElement('p');
+    nombre.className = 'nombre';
+    nombre.textContent = producto.nombre || 'Sin nombre';
+
+    // Chips de cantidades disponibles
+    const cantidadesWrap = document.createElement('div');
+    cantidadesWrap.className = 'cantidades';
+
+    producto.cantidades.forEach(c => {
+      const chip = document.createElement('span');
+      chip.className = 'cantidad-chip';
+      chip.textContent = c;
+      cantidadesWrap.appendChild(chip);
+    });
+
+    // Referencia
+    const ref = document.createElement('p');
+    ref.className = 'referencia';
+    ref.textContent = producto.referencia ? `Ref. ${producto.referencia}` : '';
+
+    info.appendChild(nombre);
+    info.appendChild(cantidadesWrap);
+    if (producto.referencia) info.appendChild(ref);
+
+    tarjeta.appendChild(imgWrap);
+    tarjeta.appendChild(info);
+
+    return tarjeta;
+  }
+
+
+  /*
+  ============================================================
+    PASO 5 – RENDERIZAR LA GRILLA
+    Vacía la grilla y dibuja una tarjeta por cada producto
+    (ya agrupado) de la lista recibida.
+  ============================================================
+  */
+  function renderizarGrilla(lista) {
+    const grilla        = document.getElementById('grilla');
+    const sinResultados = document.getElementById('sin-resultados');
+    const contador      = document.getElementById('contador');
+
+    grilla.innerHTML = '';
+
+    if (lista.length === 0) {
+      sinResultados.style.display = 'block';
+      contador.textContent = '0 productos';
+      return;
+    }
+
+    sinResultados.style.display = 'none';
+    contador.textContent = `${lista.length} producto${lista.length !== 1 ? 's' : ''}`;
+
+    lista.forEach(producto => {
+      grilla.appendChild(crearTarjeta(producto));
+    });
+  }
+
+
+  /*
+  ============================================================
+    PASO 6 – FILTRAR Y ORDENAR
+    Se llama cada vez que el usuario escribe en el buscador
+    o cambia el criterio de orden.
+  ============================================================
+  */
+
+  let todosLosProductos = []; // productos de la categoría activa, ya agrupados
+  const cacheCategorias = {}; // evita re-parsear el CSV al volver a una categoría ya vista
+
+
+  /*
+  ============================================================
+    INICIO – se ejecuta cuando la página termina de cargar
+  ============================================================
+  */
+  window.addEventListener('DOMContentLoaded', async () => {
+    await cargarCategoria('hombres');
+    inicializarBarraCategorias();
+  });
+
+  /*
+    Carga (o recupera de caché) los productos de una categoría
+    y los renderiza en la grilla.
+  */
+  async function cargarCategoria(categoria) {
+    try {
+      if (!cacheCategorias[categoria]) {
+        const cargadores = {
+          hombres: cargarCSV_hombres,
+          mujeres: cargarCSV_mujeres,
+        };
+        const texto     = await cargadores[categoria]();
+        const productos = parsearCSV(texto);
+        cacheCategorias[categoria] = procesarCantidades(productos);
+      }
+      todosLosProductos = cacheCategorias[categoria];
+      renderizarGrilla(todosLosProductos);
+    } catch (error) {
+      document.getElementById('grilla').innerHTML =
+        `<p style="color:#c44;padding:2rem">
+          Error al cargar el catálogo: ${error.message}.<br>
+          Asegurate de que los archivos CSV estén en la misma carpeta que este HTML
+          y de que la página se esté sirviendo por http(s), no abierta directamente como archivo local.
+        </p>`;
+    }
+  }
+
+
+  /*
+  ============================================================
+    PASO 7 – BARRA DE CATEGORÍAS (Hombres / Mujeres)
+  ============================================================
+  */
+  function inicializarBarraCategorias() {
+    const botones = document.querySelectorAll('#barra-categorias button');
+
+    botones.forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const categoria = btn.dataset.categoria;
+        botones.forEach(b => b.classList.remove('activa'));
+        btn.classList.add('activa');
+        await cargarCategoria(categoria);
+      });
+    });
+  }
+
+  /*
+    Muestra un mensaje flotante breve (toast) y lo oculta solo
+    después de unos segundos.
+  */
+  let toastTimeout = null;
+  function mostrarToast(mensaje) {
+    const toast = document.getElementById('toast');
+    toast.textContent = mensaje;
+    toast.classList.add('visible');
+
+    // Si ya había un toast esperando para ocultarse, lo cancelamos
+    if (toastTimeout) clearTimeout(toastTimeout);
+
+    toastTimeout = setTimeout(() => {
+      toast.classList.remove('visible');
+    }, 2200);
+  }
+  </script>
+
+</body>
+</html>
