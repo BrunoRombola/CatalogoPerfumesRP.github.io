@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>RP Luxury – Fragancias</title>
+  <title>Luxury – Fragancias</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -227,14 +227,15 @@
       right: 0;
       display: flex;
       background: var(--superficie);
-      border-top: 1px solid var(--borde);
-      box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+      border-top: 2px solid #b0aa9e;
+      box-shadow: 0 -4px 16px rgba(0,0,0,0.13);
       z-index: 100;
     }
     #barra-categorias button {
       flex: 1;
       background: none;
       border: none;
+      border-right: 1px solid #c8c2b8;
       padding: 0.85rem 0.5rem;
       font-family: 'Montserrat', sans-serif;
       font-size: 0.78rem;
@@ -245,6 +246,9 @@
       transition: color 0.2s, background 0.2s;
       border-bottom: 2px solid transparent;
     }
+    #barra-categorias button:last-child {
+      border-right: none;
+    }
     #barra-categorias button.activa {
       color: var(--dorado);
       border-bottom: 2px solid var(--dorado);
@@ -252,7 +256,7 @@
     }
     #barra-categorias button:hover:not(.activa) {
       color: var(--texto);
-      background: rgba(0,0,0,0.02);
+      background: rgba(0,0,0,0.04);
     }
 
     /* Espacio al final de la página para que la barra no tape contenido */
@@ -287,7 +291,7 @@
 <body>
 
   <header>
-    <h1>RP Luxury — Fragancias</h1>
+    <h1>Luxury — Fragancias</h1>
     <p id="contador">Cargando…</p>
   </header>
 
@@ -341,7 +345,7 @@
     const cabecera = parsearLineaCSV(lineas[0]);
 
     // Solo nos interesan estas columnas; el resto se descarta al parsear
-    const COLUMNAS_USADAS = ['nombre', 'cantidades_disponibles', 'referencia', 'url_imagen'];
+    const COLUMNAS_USADAS = ['nombre', 'cantidades_disponibles', 'referencia'];
 
     const productos = [];
     for (let i = 1; i < lineas.length; i++) {
@@ -455,7 +459,7 @@
     img.onerror = () => {
       imgWrap.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#999;font-size:0.7rem;text-align:center;padding:1rem;">Sin imagen</div>`;
     };
-    img.src = producto.url_imagen || '';
+    img.src = rutaImagen(producto.referencia);
 
     imgWrap.appendChild(img);
 
@@ -535,6 +539,21 @@
   let todosLosProductos = []; // productos de la categoría activa, ya agrupados
   const cacheCategorias = {}; // evita re-parsear el CSV al volver a una categoría ya vista
 
+  // Categoría activa (se actualiza al cambiar de pestaña)
+  let categoriaActiva = 'hombres';
+
+  // Carpetas de imágenes por categoría (relativas al HTML)
+  const CARPETAS_IMAGENES = {
+    hombres: 'Imagenes_fragancias_masculinas',
+    mujeres: 'Imagenes_fragancias_femeninas',
+  };
+
+  function rutaImagen(referencia) {
+    if (!referencia) return '';
+    const carpeta = CARPETAS_IMAGENES[categoriaActiva] || '';
+    return `${carpeta}/${referencia}.jpg`;
+  }
+
 
   /*
   ============================================================
@@ -551,6 +570,7 @@
     y los renderiza en la grilla.
   */
   async function cargarCategoria(categoria) {
+    categoriaActiva = categoria;
     try {
       if (!cacheCategorias[categoria]) {
         const cargadores = {
