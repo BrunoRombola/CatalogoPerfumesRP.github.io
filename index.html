@@ -321,14 +321,14 @@
   ============================================================
   */
   async function cargarCSV_hombres() {
-    const respuesta = await fetch('fragancias_hombres.csv');
-    if (!respuesta.ok) throw new Error('No se pudo cargar fragancias_hombres.csv');
+    const respuesta = await fetch('fragancias_masculinas.csv');
+    if (!respuesta.ok) throw new Error('No se pudo cargar fragancias_masculinas.csv');
     return await respuesta.text();
   }
 
   async function cargarCSV_mujeres() {
-    const respuesta = await fetch('fragancias_mujeres.csv');
-    if (!respuesta.ok) throw new Error('No se pudo cargar fragancias_mujeres.csv');
+    const respuesta = await fetch('fragancias_femeninas.csv');
+    if (!respuesta.ok) throw new Error('No se pudo cargar fragancias_femeninas.csv');
     return await respuesta.text();
   }
 
